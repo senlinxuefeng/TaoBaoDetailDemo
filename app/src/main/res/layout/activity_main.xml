@@ -13,9 +13,8 @@
         <RelativeLayout
             android:id="@+id/ll_good_detail"
             android:layout_width="match_parent"
-            android:layout_height="65dp"
-            android:background="@color/transparent"
-            android:paddingTop="@dimen/spacing_normal">
+            android:layout_height="48dp"
+            android:background="@color/transparent">
 
             <ImageView
                 android:id="@+id/iv_good_detai_back"
@@ -69,7 +68,7 @@
 
             <include layout="@layout/layout_top" />
 
-            <include layout="@layout/layout_bottom" />
+            <include layout="@layout/layout_bottom_2" />
 
             <RelativeLayout
                 android:layout_width="match_parent"

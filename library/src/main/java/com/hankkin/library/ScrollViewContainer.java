@@ -3,6 +3,7 @@ package com.hankkin.library;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -17,6 +18,16 @@ import java.util.TimerTask;
  * 包含两个ScrollView的容器
  */
 public class ScrollViewContainer extends RelativeLayout {
+
+    private OnUpOrDownListener onUpOrDownListener;
+
+    public interface OnUpOrDownListener {
+        public void onUpOrDown(boolean isUp);
+    }
+
+    public void setOnUpOrDownListener(OnUpOrDownListener onUpOrDownListener) {
+        this.onUpOrDownListener = onUpOrDownListener;
+    }
 
     /**
      * 自动上滑
@@ -147,7 +158,8 @@ public class ScrollViewContainer extends RelativeLayout {
                         mMoveLen = 0;
                         mCurrentViewIndex = 0;
                     } else if (mMoveLen < -mViewHeight) {
-                        mMoveLen = -mViewHeight;
+//                        mMoveLen = -mViewHeight;
+                        mMoveLen = -topView.getMeasuredHeight();
                         mCurrentViewIndex = 1;
                         if (isTuninginterface) {
                             isTuninginterface = false;
@@ -161,7 +173,8 @@ public class ScrollViewContainer extends RelativeLayout {
                     mMoveLen += (ev.getY() - mLastY);
                     // 防止上下越界
                     if (mMoveLen < -mViewHeight) {
-                        mMoveLen = -mViewHeight;
+//                        mMoveLen = -mViewHeight;
+                        mMoveLen = -topView.getMeasuredHeight();
                         mCurrentViewIndex = 1;
                     } else if (mMoveLen > 0) {
                         mMoveLen = 0;
@@ -198,7 +211,7 @@ public class ScrollViewContainer extends RelativeLayout {
                 if (mMoveLen == 0 || mMoveLen == -mViewHeight)
                     break;
 
-                System.out.println("======onMeasure====mMoveLen======" + mMoveLen + "     " + tempHeight);
+                System.out.println("======ACTION_UP====mMoveLen======" + mMoveLen + "     " + tempHeight);
 
                 if (Math.abs(mYV) < 500) {
                     // 速度小于一定值的时候当作静止释放，这时候两个View往哪移动取决于滑动的距离
@@ -230,6 +243,11 @@ public class ScrollViewContainer extends RelativeLayout {
                     else
                         state = AUTO_DOWN;
                 }
+
+                if (onUpOrDownListener != null) {
+                    onUpOrDownListener.onUpOrDown(state == 1);
+                }
+
                 mTimer.schedule(2);
                 try {
                     vt.recycle();
@@ -237,6 +255,7 @@ public class ScrollViewContainer extends RelativeLayout {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
                 break;
 
             default:
@@ -265,8 +284,10 @@ public class ScrollViewContainer extends RelativeLayout {
                             + centerView.getMeasuredHeight());
         } else {
             centerView.layout(0, topView.getMeasuredHeight() + (int) mMoveLen - tempHeight,
-                    mViewWidth, topView.getMeasuredHeight() + (int) mMoveLen
-                            + centerView.getMeasuredHeight() - tempHeight);
+                    mViewWidth, topView.getMeasuredHeight() + (int) mMoveLen + centerView.getMeasuredHeight() - tempHeight);
+
+//            centerView.layout(0, topView.getMeasuredHeight() + (int) mMoveLen - 0,
+//                    mViewWidth, topView.getMeasuredHeight() + (int) mMoveLen + centerView.getMeasuredHeight() - 0);
         }
 
     }
@@ -282,15 +303,31 @@ public class ScrollViewContainer extends RelativeLayout {
             System.out.println("======onMeasure====mViewWidth======" + mViewWidth);
 
 
-            tempHeight = CommonUtils.dip2px(getContext(), 80);
-
             topView = getChildAt(0);
             bottomView = getChildAt(1);
 
             centerView = getChildAt(2);
+            tempHeight = CommonUtils.dip2px(getContext(), 80);
 
             bottomView.setOnTouchListener(bottomViewTouchListener);
             topView.setOnTouchListener(topViewTouchListener);
+        } else {
+            //修复手机小米兼容问题
+            if (topView.getMeasuredHeight() > mViewHeight) {
+                mViewHeight = topView.getMeasuredHeight();
+            }
+        }
+
+//        System.out.println("======onMeasure====mViewHeight======" + mViewHeight + "      topView   " + topView.getMeasuredHeight());
+
+    }
+
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        if (topView != null) {
+            System.out.println("======onMeasure====mViewHeight======" + mViewHeight + "      topView   " + topView.getMeasuredHeight());
         }
     }
 
@@ -311,7 +348,8 @@ public class ScrollViewContainer extends RelativeLayout {
 
         @Override
         public boolean onTouch(View v, MotionEvent event) {
-            ScrollView sv = (ScrollView) v;
+//            ScrollView sv = (ScrollView) v;
+            RecyclerView sv = (RecyclerView) v;
             if (sv.getScrollY() == 0 && mCurrentViewIndex == 1)
                 canPullDown = true;
             else
