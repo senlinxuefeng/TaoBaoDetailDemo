@@ -5,6 +5,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -20,6 +22,7 @@ import java.util.TimerTask;
 public class ScrollViewContainer extends RelativeLayout {
 
     private OnUpOrDownListener onUpOrDownListener;
+    private GestureDetector gestureDetector;
 
     public interface OnUpOrDownListener {
         public void onUpOrDown(boolean isUp);
@@ -128,8 +131,48 @@ public class ScrollViewContainer extends RelativeLayout {
     }
 
     private void init() {
+        gestureDetector = new GestureDetector(getContext(), onGestureListener);
         mTimer = new MyTimer(handler);
     }
+
+
+    GestureDetector.OnGestureListener onGestureListener = new GestureDetector.OnGestureListener() {
+        @Override
+        public boolean onDown(MotionEvent e) {
+            Log.i("onGestureListener","onDown");
+            return false;
+        }
+
+        @Override
+        public void onShowPress(MotionEvent e) {
+            Log.i("onGestureListener","onShowPress");
+        }
+
+        @Override
+        public boolean onSingleTapUp(MotionEvent e) {
+            Log.i("onGestureListener","onSingleTapUp");
+            return false;
+        }
+
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            Log.i("onGestureListener","onScroll");
+            return false;
+        }
+
+        @Override
+        public void onLongPress(MotionEvent e) {
+            Log.i("onGestureListener","onLongPress");
+        }
+
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+
+            Log.i("onGestureListener","onFling");
+
+            return false;
+        }
+    };
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
